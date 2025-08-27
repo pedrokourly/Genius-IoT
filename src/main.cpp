@@ -1,111 +1,162 @@
+// Alunos: Pedro Kourly; Fernanda Oliveira; Vinicius Camilo
 #include <Arduino.h>
 
 void proximaRodada();
 void reproduzirSequencia();
 void aguardarJogador();
 void aguardarJogada();
+void perderVida();
+void vitoria();
 void gameOver();
 
-// Nossa sequência de até 100 itens vai começar vazia.
-int sequencia[4] = {};
-// Indica a rodada atual que o jogo se encontra.
+int sequencia[20] = {};
+
 int rodada_atual = 0;
-// Indica o passo atual dentro da sequência, é usado enquanto a sequência
-// está sendo reproduzida.
 int passo_atual_na_sequencia = 0;
+int vidas = 3;
 
-int pinosLeds[4] = { 28, 26, 24, 22 };
-int pinosBotoes[4] = { 34, 36, 38, 40 };
+int pinosLeds[4] = {28, 26, 24, 22};
+int pinosLedsVida[3] = {46, 48, 50};
+int pinosBotoes[4] = {34, 36, 38, 40};
 
-// Indica se um botão foi pressionado durante o loop principal.
 int botao_pressionado = 0;
-// Flag indicando se o jogo acabou.
-int perdeu_o_jogo = false;
 
-void setup() {
+int perdeu_o_jogo = false;
+int acertou_a_jogada = false;
+
+void setup()
+{
   // Definindo o modo dos pinos dos Leds como saída.
-  for (int i = 0; i <= 3; i++) {
+  for (int i = 0; i <= 3; i++)
+  {
     pinMode(pinosLeds[i], OUTPUT);
   }
- 
+
+  // Definindo o modo dos pinos dos Leds de vida como saída.
+  for (int i = 0; i <= 2; i++)
+  {
+    pinMode(pinosLedsVida[i], OUTPUT);
+    digitalWrite(pinosLedsVida[i], HIGH);
+  }
+
   // Definindo o modo dos pinos dos Botões como pullup interno.
-  for (int i = 0; i <= 3; i++) {
+  for (int i = 0; i <= 3; i++)
+  {
     pinMode(pinosBotoes[i], INPUT_PULLUP);
   }
 
-
+  // Inicializa a primeira rodada.
+  proximaRodada();
 }
 
-void loop() {
+void loop()
+{
   // Se perdeu o jogo reinicializamos todas as variáveis.
-  if (perdeu_o_jogo) {
-    int sequencia[4] = {};
+  if (perdeu_o_jogo)
+  {
+    sequencia[20] = {};
     rodada_atual = 0;
     passo_atual_na_sequencia = 0;
+    vidas = 3;
+    for (int i = 0; i <= 2; i++)
+    {
+      digitalWrite(pinosLedsVida[i], HIGH);
+    }
+    perdeu_o_jogo = false;
+    proximaRodada();
+  };
+
+  if (rodada_atual == 20 && acertou_a_jogada == true)
+  {
+    vitoria();
+    sequencia[20] = {};
+    rodada_atual = 0;
+    passo_atual_na_sequencia = 0;
+    vidas = 3;
+    for (int i = 0; i <= 2; i++)
+    {
+      digitalWrite(pinosLedsVida[i], HIGH);
+    }
     perdeu_o_jogo = false;
   };
 
   // Chama a função que inicializa a próxima rodada.
-  proximaRodada();
+  if (acertou_a_jogada == true)
+  {
+    proximaRodada();
+  }
+  
   // Reproduz a sequência atual.
   reproduzirSequencia();
   // Aguarda os botões serem pressionados pelo jogador.
   aguardarJogador();
- 
+
   // Aguarda 1 segundo entre cada jogada.
   delay(1000);
-
 }
 
-void proximaRodada() {
+void proximaRodada()
+{
   int numero_sorteado = random(0, 4);
   sequencia[rodada_atual++] = numero_sorteado;
 }
 
 // Reproduz a sequência para ser memorizada.
-void reproduzirSequencia() {
-  for (int i = 0; i < rodada_atual; i++) {
+void reproduzirSequencia()
+{
+  for (int i = 0; i < rodada_atual; i++)
+  {
     digitalWrite(pinosLeds[sequencia[i]], HIGH);
     delay(500);
     digitalWrite(pinosLeds[sequencia[i]], LOW);
     delay(100);
   }
-
 }
 
 // Aguarda o jogador iniciar sua jogada.
-void aguardarJogador() {
-  for (int i = 0; i < rodada_atual; i++) {
+void aguardarJogador()
+{
+  for (int i = 0; i < rodada_atual; i++)
+  {
     aguardarJogada();
-    
-  // verifica a jogada  
-  if (sequencia[passo_atual_na_sequencia] != botao_pressionado) {
-      gameOver(); // perdeu
-   }
-   
-   // para o jogo se perdeu
-    if (perdeu_o_jogo) {
+
+    // verifica a jogada
+    if (sequencia[passo_atual_na_sequencia] != botao_pressionado)
+    {
+      perderVida();
+      acertou_a_jogada = false;
       break;
     }
-     passo_atual_na_sequencia++;
+
+    // para o jogo se perdeu
+    if (perdeu_o_jogo)
+    {
+      break;
+    }
+    acertou_a_jogada = true;
+    passo_atual_na_sequencia++;
   }
- 
+
   // Redefine a variável para 0.
   passo_atual_na_sequencia = 0;
 }
 
-void aguardarJogada() {
+void aguardarJogada()
+{
   boolean jogada_efetuada = false;
-  while (!jogada_efetuada) {
-    for (int i = 0; i <= 3; i++) {
-      if (!digitalRead(pinosBotoes[i])) {
+  while (!jogada_efetuada)
+  {
+    for (int i = 0; i <= 3; i++)
+    {
+      if (!digitalRead(pinosBotoes[i]))
+      {
         // Dizendo qual foi o botao pressionado.
         botao_pressionado = i;
- 
+
         digitalWrite(pinosLeds[i], HIGH);
         delay(300);
         digitalWrite(pinosLeds[i], LOW);
- 
+
         jogada_efetuada = true;
       }
     }
@@ -113,28 +164,74 @@ void aguardarJogada() {
   }
 }
 
-void gameOver() {
-    // GAME OVER.
-    for (int i = 0; i <= 3; i++) {
+void perderVida()
+{
+  vidas--;
+  digitalWrite(pinosLedsVida[vidas], LOW);
+  delay(1000);
+  if (vidas == 0)
+  {
+    gameOver();
+  }
+}
 
-      digitalWrite(pinosLeds[i], HIGH);
-      delay(200);
-      digitalWrite(pinosLeds[i], LOW);
+void vitoria(){
+  for (int i = 0; i <= 3; i++)
+  {
+    digitalWrite(pinosLeds[i], HIGH);
+  }
+  delay(500);
+  for (int i = 0; i <= 3; i++)
+  {
+    digitalWrite(pinosLeds[i], LOW);
+  }
+  delay(500);
+  for (int i = 0; i <= 3; i++)
+  {
+    digitalWrite(pinosLeds[i], HIGH);
+  }
+  delay(500);
+  for (int i = 0; i <= 3; i++)
+  {
+    digitalWrite(pinosLeds[i], LOW);
+  }
+  delay(500);
+  for (int i = 0; i <= 3; i++)
+  {
+    digitalWrite(pinosLeds[i], HIGH);
+  }
+  delay(2000);
+  for (int i = 0; i <= 3; i++)
+  {
+    digitalWrite(pinosLeds[i], LOW);
+  }
+  delay(500);
+}
 
-    }
- 
-    for (int i = 0; i <= 3; i++) {
-      digitalWrite(pinosLeds[0], HIGH);
-      digitalWrite(pinosLeds[1], HIGH);
-      digitalWrite(pinosLeds[2], HIGH);
-      digitalWrite(pinosLeds[3], HIGH);
-      delay(100);
-      digitalWrite(pinosLeds[0], LOW);
-      digitalWrite(pinosLeds[1], LOW);
-      digitalWrite(pinosLeds[2], LOW);
-      digitalWrite(pinosLeds[3], LOW);
-      delay(100);
-    }
- 
-    perdeu_o_jogo = true;  
-} 
+void gameOver()
+{
+  // GAME OVER.
+  for (int i = 0; i <= 3; i++)
+  {
+
+    digitalWrite(pinosLeds[i], HIGH);
+    delay(200);
+    digitalWrite(pinosLeds[i], LOW);
+  }
+
+  for (int i = 0; i <= 3; i++)
+  {
+    digitalWrite(pinosLeds[0], HIGH);
+    digitalWrite(pinosLeds[1], HIGH);
+    digitalWrite(pinosLeds[2], HIGH);
+    digitalWrite(pinosLeds[3], HIGH);
+    delay(100);
+    digitalWrite(pinosLeds[0], LOW);
+    digitalWrite(pinosLeds[1], LOW);
+    digitalWrite(pinosLeds[2], LOW);
+    digitalWrite(pinosLeds[3], LOW);
+    delay(100);
+  }
+
+  perdeu_o_jogo = true;
+}
