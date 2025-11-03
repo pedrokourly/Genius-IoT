@@ -1,4 +1,3 @@
-// Alunos: Pedro Kourly; Fernanda Oliveira; Vinicius Camilo
 #include <Arduino.h>
 
 void proximaRodada();
