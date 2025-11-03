@@ -9,15 +9,18 @@ void perderVida();
 void vitoria();
 void gameOver();
 
-int sequencia[20] = {};
+// ALTERAR CASO NECESSÁRIO
+int const MAX_RODADAS = 10;
+int vidas = 3;
+
+int sequencia[MAX_RODADAS] = {};
 
 int rodada_atual = 0;
 int passo_atual_na_sequencia = 0;
-int vidas = 3;
 
-int pinosLeds[4] = {0, 2, 4, 6};
-int pinosLedsVida[3] = {8, 9, 10};
-int pinosBotoes[4] = {1, 3, 5, 7};
+int pinosLeds[4] = {12, 10, 8, 6};
+int pinosLedsVida[3] = {2, 3, 4};
+int pinosBotoes[4] = {11, 9, 7, 5};
 
 int botao_pressionado = 0;
 
@@ -26,6 +29,7 @@ int acertou_a_jogada = false;
 
 void setup()
 {
+  randomSeed(analogRead(A0));
   // Definindo o modo dos pinos dos Leds como saída.
   for (int i = 0; i <= 3; i++)
   {
@@ -54,7 +58,7 @@ void loop()
   // Se perdeu o jogo reinicializamos todas as variáveis.
   if (perdeu_o_jogo)
   {
-    sequencia[20] = {};
+    sequencia[MAX_RODADAS] = {};
     rodada_atual = 0;
     passo_atual_na_sequencia = 0;
     vidas = 3;
@@ -66,10 +70,10 @@ void loop()
     proximaRodada();
   };
 
-  if (rodada_atual == 20 && acertou_a_jogada == true)
+  if (rodada_atual == MAX_RODADAS && acertou_a_jogada == true)
   {
     vitoria();
-    sequencia[20] = {};
+    sequencia[MAX_RODADAS] = {};
     rodada_atual = 0;
     passo_atual_na_sequencia = 0;
     vidas = 3;
