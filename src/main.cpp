@@ -15,9 +15,9 @@ int rodada_atual = 0;
 int passo_atual_na_sequencia = 0;
 int vidas = 3;
 
-int pinosLeds[4] = {28, 26, 24, 22};
-int pinosLedsVida[3] = {46, 48, 50};
-int pinosBotoes[4] = {34, 36, 38, 40};
+int pinosLeds[4] = {0, 2, 4, 6};
+int pinosLedsVida[3] = {8, 9, 10};
+int pinosBotoes[4] = {1, 3, 5, 7};
 
 int botao_pressionado = 0;
 
