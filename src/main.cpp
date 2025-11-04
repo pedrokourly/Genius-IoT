@@ -8,8 +8,18 @@ void perderVida();
 void vitoria();
 void gameOver();
 
+#define SPEAKER_PIN 13
+
+// Frequências para cada cor (em Hz).
+// Estas são próximas das notas do Genius original (Sol, Dó, Mi, Sol mais agudo)
+// Cor 0 (Pino 12) = Sol (G4)
+// Cor 1 (Pino 10) = Dó (C5)
+// Cor 2 (Pino 8)  = Mi (E5)
+// Cor 3 (Pino 6)  = Sol mais agudo (G5)
+int frequencias[4] = {392, 523, 659, 784};
+
 // ALTERAR CASO NECESSÁRIO
-int const MAX_RODADAS = 10;
+int const MAX_RODADAS = 3;
 int vidas = 3;
 
 int sequencia[MAX_RODADAS] = {};
@@ -109,9 +119,19 @@ void reproduzirSequencia()
 {
   for (int i = 0; i < rodada_atual; i++)
   {
-    digitalWrite(pinosLeds[sequencia[i]], HIGH);
+
+    int cor_atual = sequencia[i]; 
+    int freq_atual = frequencias[cor_atual];
+
+    digitalWrite(pinosLeds[cor_atual], HIGH);
+    tone(SPEAKER_PIN, freq_atual);
+    
     delay(500);
-    digitalWrite(pinosLeds[sequencia[i]], LOW);
+
+
+    digitalWrite(pinosLeds[cor_atual], LOW);
+    noTone(SPEAKER_PIN);
+
     delay(100);
   }
 }
@@ -153,14 +173,21 @@ void aguardarJogada()
     {
       if (!digitalRead(pinosBotoes[i]))
       {
-        // Dizendo qual foi o botao pressionado.
+
         botao_pressionado = i;
 
         digitalWrite(pinosLeds[i], HIGH);
-        delay(300);
+        tone(SPEAKER_PIN, frequencias[i]);
+
+        delay(300); 
+
         digitalWrite(pinosLeds[i], LOW);
+        noTone(SPEAKER_PIN);
+
 
         jogada_efetuada = true;
+        
+        delay(50); 
       }
     }
     delay(10);
@@ -179,6 +206,12 @@ void perderVida()
 }
 
 void vitoria(){
+
+  tone(SPEAKER_PIN, 523, 200); delay(200);
+  tone(SPEAKER_PIN, 659, 200); delay(200);
+  tone(SPEAKER_PIN, 784, 200); delay(200);
+  tone(SPEAKER_PIN, 1046, 400); delay(400);
+
   for (int i = 0; i <= 3; i++)
   {
     digitalWrite(pinosLeds[i], HIGH);
@@ -214,6 +247,9 @@ void vitoria(){
 void gameOver()
 {
   // GAME OVER.
+
+  tone(SPEAKER_PIN, 150, 1500); // Tom de 150Hz por 1.5 segundos
+
   for (int i = 0; i <= 3; i++)
   {
 
