@@ -19,7 +19,7 @@ void gameOver();
 int frequencias[4] = {392, 523, 659, 784};
 
 // ALTERAR CASO NECESSÁRIO
-int const MAX_RODADAS = 3;
+int const MAX_RODADAS = 12;
 int vidas = 3;
 
 int sequencia[MAX_RODADAS] = {};
